@@ -1,0 +1,55 @@
+
+services:
+  auth_service:
+    build: ./auth_service
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./auth_service/auth.db:/app/auth.db
+    environment:
+      - FLASK_ENV=development
+      - SECRET_KEY='vuO1SiuDS7SkmkxM__24lgh4R-s9nJ52Y4vhV1xjVcU'
+
+  book_service:
+    build: ./book_service
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./book_service/books.db:/app/books.db
+    depends_on:
+      - auth_service
+      - notification_service
+
+  notification_service:
+    build: ./notification_service
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./notification_service/notification.db:/app/notification.db
+
+  admin_gui:
+    build: ./admin_gui
+    environment:
+      - DISPLAY=host.docker.internal:0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    depends_on:
+      - auth_service
+      - book_service
+
+  student_gui:
+    build: ./student_gui
+    environment:
+      - DISPLAY=host.docker.internal:0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    depends_on:
+      - auth_service
+      - book_service
+      - notification_service
+
+
+volumes:
+  auth_db:
+  books_db:
+  notification_db:
